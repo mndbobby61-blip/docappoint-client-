@@ -1,0 +1,41 @@
+[
+     {
+    "id": "d1",
+    "name": "Dr. Ayesha Rahman",
+    "specialty": "Cardiologist",
+    "image": "/assets/doctor1.jpg",
+    "experience": "10 years",
+    "availability": ["09:00 AM - 12:00 PM", "04:00 PM - 07:00 PM"],
+    "description": "Experienced cardiologist specializing in heart diseases and preventive cardiac care.",
+    "hospital": "Labaid Cardiac Hospital",
+    "location": "Dhanmondi, Dhaka",
+    "fee": 800,
+    "rating": 4.9
+  },
+  {
+    "id": "d2",
+    "name": "Dr. Mahmud Hasan",
+    "specialty": "Neurologist",
+    "image": "/assets/doctor2.jpg",
+    "experience": "8 years",
+    "availability": ["10:00 AM - 01:00 PM", "06:00 PM - 08:00 PM"],
+    "description": "Expert in neurological disorders, migraine treatment, and stroke management.",
+    "hospital": "Square Hospital",
+    "location": "Panthapath, Dhaka",
+    "fee": 1000,
+    "rating": 4.8
+  },
+   {
+    "id": "d3",
+    "name": "Dr. Tanvir Ahmed",
+    "specialty": "Orthopedic Surgeon",
+    "image": "/assets/doctor3.jpg",
+    "experience": "12 years",
+    "availability": ["08:00 AM - 11:00 AM", "03:00 PM - 06:00 PM"],
+    "description": "Orthopedic expert for bone fractures, joint replacement, and arthritis treatment.",
+    "hospital": "United Hospital",
+    "location": "Gulshan, Dhaka",
+    "fee": 1200,
+    "rating": 4.9
+  }
+]
