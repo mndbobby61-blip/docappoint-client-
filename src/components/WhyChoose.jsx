@@ -11,7 +11,9 @@ export default function WhyChoose() {
                 {/* Card 1 */}
                 <div className="group p-8 bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100">
 
-                    <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-cyan-100 group-hover:bg-cyan-500 transition-all duration-500"></div>
+                    <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-cyan-100 group-hover:bg-cyan-500 transition-all duration-500">
+                        <img src="/assets/expert.png" alt="experts" className="w-full h-full p-3" />
+                    </div>
 
                     <h3 className="text-xl font-bold group-hover:text-cyan-600 transition">
                         Expert Doctors
@@ -25,7 +27,9 @@ export default function WhyChoose() {
                 {/* Card 2 */}
                 <div className="group p-8 bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100">
 
-                    <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-blue-100 group-hover:bg-blue-500 transition-all duration-500"></div>
+                    <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-blue-100 group-hover:bg-blue-500 transition-all duration-500">
+                        <img src="/assets/booking.png" alt="experts" className="w-full h-full p-3" />
+                    </div>
 
                     <h3 className="text-xl font-bold group-hover:text-blue-600 transition">
                         Easy Booking
@@ -39,10 +43,12 @@ export default function WhyChoose() {
                 {/* Card 3 */}
                 <div className="group p-8 bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100">
 
-                    <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-purple-100 group-hover:bg-purple-500 transition-all duration-500"></div>
+                    <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-purple-100 group-hover:bg-purple-500 transition-all duration-500">
+                        <img src="/assets/emergency.png" alt="experts" className="w-full h-full p-3" />
+                    </div>
 
                     <h3 className="text-xl font-bold group-hover:text-purple-600 transition">
-                        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=exclamation" />
+                    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=exclamation" />
                         24/7 Support
                     </h3>
 
