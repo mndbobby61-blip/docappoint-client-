@@ -5,7 +5,15 @@ import WhyChoose from "@/components/WhyChoose";
 import Testimonials from "@/components/Testimonials";
 
 
-export default function Home() {
+async function getData() {
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+  return [];
+}
+
+
+export default async function Home() {
+  await getData();
+
   return (
     <main>
       <Hero />
