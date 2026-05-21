@@ -6,9 +6,9 @@ export default function BookingCard({ booking }) {
   const router = useRouter();
 
   const handleDelete = async () => {
-    await fetch("/api/bookings", {
+    await fetch(`http://localhost:8080/bookings/${booking._id}`, {
       method: "DELETE",
-      body: JSON.stringify({ id: booking._id }),
+       }),
     });
 
     router.refresh();

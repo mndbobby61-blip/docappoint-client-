@@ -69,10 +69,10 @@ export default function Navbar() {
                     </Link>
 
                     <Link
-                        href="/all-appoinments"
+                        href="/all-appointments"
                         className="hover:text-blue-200 transition"
                     >
-                        All Appointment
+                        All Appointments
                     </Link>
 
                     <Link
@@ -166,7 +166,7 @@ export default function Navbar() {
 
                     <Link
                         className="block hover:text-blue-200"
-                        href="/all-appoinments"
+                        href="/all-appointments"
                         onClick={() => setOpen(false)}
                     >
                         All Appointment

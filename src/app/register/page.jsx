@@ -1,145 +1,108 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
-import { GrGoogle } from "react-icons/gr";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
-export default function Register() {
-    const router = useRouter();
+export default function RegisterPage() {
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
 
+    // ১. সাধারণ ইমেইল দিয়ে সাইন আপ
     const handleRegister = async (e) => {
         e.preventDefault();
+        setError("");
+        setLoading(true);
 
         const form = new FormData(e.target);
-
         const name = form.get("name");
         const email = form.get("email");
-        const image =
-            form.get("image") ||
-            "https://i.ibb.co/4pDNDk1/default-avatar.png";
         const password = form.get("password");
 
-        // password validation
-        if (!/(?=.*[a-z])(?=.*[A-Z]).{6,}/.test(password)) {
-            setError(
-                "Password must contain 1 uppercase, 1 lowercase and minimum 6 characters."
-            );
-            return;
-        }
-
-        const res = await authClient.signUp.email({
-            name,
+        await authClient.signUp.email({
             email,
             password,
-            image,
-            callbackURL: "/",
+            name,
+            callbackURL: "/dashboard",
+        }, {
+            onSuccess: () => {
+                router.push("/dashboard");
+                router.refresh();
+            },
+            onError: (ctx) => {
+                setError(ctx.error.message);
+                setLoading(false);
+            }
         });
-
-        if (res.error) {
-            setError(res.error.message);
-            return;
-        }
-
-        router.push("/login");
     };
 
-    const handleGoogleLogin = async () => {
+    // ২. গুগল দিয়ে সরাসরি সাইন আপ/লগইন
+    const handleGoogleRegister = async () => {
+        setError("");
         await authClient.signIn.social({
             provider: "google",
-            callbackURL: "/",
+            callbackURL: "/dashboard",
+        }, {
+            onError: (ctx) => {
+                setError(ctx.error.message);
+            }
         });
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cyan-50 via-white to-blue-100 px-4">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
+            <div className="max-w-md w-full bg-white p-8 rounded-2xl border shadow-sm">
+                <h2 className="text-3xl font-bold text-gray-800 text-center mb-2">Create Account</h2>
+                <p className="text-sm text-gray-500 text-center mb-6">Sign up to start booking appointments</p>
 
-            <div className="w-full max-w-md bg-white shadow-2xl rounded-3xl p-8 border border-cyan-100">
-
-                {/* title */}
-                <h1 className="text-3xl font-bold text-center text-cyan-600">
-                    Register
-                </h1>
-
-                <p className="text-center text-gray-500 mt-2">
-                    Create your DocAppoint account
-                </p>
-
-                {/* error */}
                 {error && (
-                    <div className="bg-red-100 text-red-600 p-3 mt-4 rounded-xl text-sm text-center">
+                    <p className="bg-red-100 text-red-600 p-3 rounded-xl mb-4 text-center text-sm font-medium">
                         {error}
-                    </div>
+                    </p>
                 )}
 
-                <form onSubmit={handleRegister} className="mt-6 space-y-4">
+                {/* গুগল সাইন আপ বাটন */}
+                <button
+                    onClick={handleGoogleRegister}
+                    type="button"
+                    className="w-full flex items-center justify-center gap-3 border p-3 rounded-xl hover:bg-gray-50 font-medium transition text-gray-700 mb-4"
+                >
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
+                    Sign Up with Google
+                </button>
 
-                    <input
-                        name="name"
-                        type="text"
-                        placeholder="Full Name"
-                        required
-                        className="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                    />
+                <div className="flex items-center my-4 text-gray-400 text-xs">
+                    <div className="flex-1 border-t"></div>
+                    <span className="px-3">OR</span>
+                    <div className="flex-1 border-t"></div>
+                </div>
 
-                    <input
-                        name="email"
-                        type="email"
-                        placeholder="Email Address"
-                        required
-                        className="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                    />
+                {/* সাধারণ ফর্ম */}
+                <form onSubmit={handleRegister} className="space-y-4">
+                    <div>
+                        <label className="text-sm font-medium text-gray-600 block mb-1">Full Name</label>
+                        <input name="name" type="text" placeholder="John Doe" className="w-full border p-3 rounded-xl focus:ring-2 focus:ring-cyan-500" required />
+                    </div>
 
-                    <input
-                        name="image"
-                        type="text"
-                        placeholder="Photo URL (Optional)"
-                        className="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                    />
+                    <div>
+                        <label className="text-sm font-medium text-gray-600 block mb-1">Email Address</label>
+                        <input name="email" type="email" placeholder="you@example.com" className="w-full border p-3 rounded-xl focus:ring-2 focus:ring-cyan-500" required />
+                    </div>
 
-                    <input
-                        name="password"
-                        type="password"
-                        placeholder="Password"
-                        required
-                        className="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                    />
+                    <div>
+                        <label className="text-sm font-medium text-gray-600 block mb-1">Password</label>
+                        <input name="password" type="password" placeholder="••••••••" className="w-full border p-3 rounded-xl focus:ring-2 focus:ring-cyan-500" required />
+                    </div>
 
-                    <button
-                        type="submit"
-                        className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:opacity-90 text-white font-semibold py-3 rounded-xl transition"
-                    >
-                        Register
+                    <button type="submit" disabled={loading} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white py-3 rounded-xl font-medium transition disabled:opacity-50">
+                        {loading ? "Registering..." : "Register with Email"}
                     </button>
                 </form>
 
-                {/* divider */}
-                <div className="flex items-center my-6">
-                    <div className="flex-1 h-px bg-gray-200"></div>
-                    <p className="px-3 text-sm text-gray-400">OR</p>
-                    <div className="flex-1 h-px bg-gray-200"></div>
-                </div>
-
-                {/* google */}
-                <button
-                    onClick={handleGoogleLogin}
-                    className="w-full flex items-center justify-center gap-2 border border-gray-200 py-3 rounded-xl hover:bg-slate-50 transition font-medium"
-                >
-                    <GrGoogle className="text-red-500" />
-                    Continue with Google
-                </button>
-
-                {/* login link */}
-                <p className="text-center mt-6 text-sm text-gray-500">
-                    Already have an account?{" "}
-                    <Link
-                        href="/login"
-                        className="text-cyan-600 font-semibold hover:underline"
-                    >
-                        Login
-                    </Link>
+                <p className="text-sm text-gray-600 text-center mt-6">
+                    Already have an account? <Link href="/login" className="text-cyan-600 hover:underline font-medium">Login here</Link>
                 </p>
             </div>
         </div>
