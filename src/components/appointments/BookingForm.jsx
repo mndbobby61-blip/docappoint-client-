@@ -1,25 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import { authClient } from "@/lib/auth-client"; // আপনার প্রজেক্টের পাথ অনুযায়ী
+import { authClient } from "@/lib/auth-client";
 
-export default function BookingPage() {
+export default function BookingForm({ doctor, onSuccess }) {
+
+    const { data: session } = authClient.useSession();
     const [loading, setLoading] = useState(false);
-    
-    // 💡 হুক বা সেশন ডেটা কম্পোনেন্টের একদম উপরে (Top Level) কল করতে হবে
-    // (যদি সেশন থেকে ইউজারের ইমেইল বা ডাটা নিতে চান)
-    const { data: session } = authClient.useSession(); 
+    const [message, setMessage] = useState("");
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+        setMessage("");
+
+        if (!session?.user) {
+            setMessage("Please login first");
+            setLoading(false);
+            return;
+        }
 
         const form = new FormData(e.target);
-        
-        // ফর্ম থেকে ডাটা নেওয়া
+
         const bookingData = {
-            userEmail: session?.user?.email || "guest@example.com",
-            doctorName: form.get("doctorName"),
+            userEmail: session.user.email,
+            doctorName: doctor.name,
             patientName: form.get("patientName"),
             gender: form.get("gender"),
             phone: form.get("phone"),
@@ -28,37 +33,95 @@ export default function BookingPage() {
         };
 
         try {
-            // এক্সপ্রেস ব্যাকএন্ডে ডাটা পাঠানো (পোস্ট রুট)
-            const response = await fetch("http://localhost:8080/api/bookings", {
+            const res = await fetch("http://localhost:8080/api/bookings", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(bookingData),
             });
 
-            const result = await response.json();
-            
-            if (response.ok) {
-                alert("✅ Booking Successful!");
-                e.target.reset(); // ফর্ম খালি করার জন্য
-            } else {
-                alert("❌ Booking Failed!");
+            if (res.ok) {
+                setMessage("Appointment booked successfully!");
+                e.target.reset();
+
+                setTimeout(() => {
+                    onSuccess?.();
+                }, 1000);
             }
-        } catch (error) {
-            console.error("Error creating booking:", error);
-            alert("❌ Server error, try again.");
+
+        } catch (err) {
+            setMessage("Server error");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            {/* আপনার বুকিং ফর্মের ইনপুট ফিল্ডগুলো এখানে থাকবে */}
-            <button type="submit" disabled={loading}>
-                {loading ? "Booking..." : "Book Appointment"}
-            </button>
-        </form>
+        <div className="p-2">
+
+            <h2 className="text-2xl font-bold text-gray-800 mb-1">
+                Book Appointment
+            </h2>
+
+            <p className="text-sm text-gray-500 mb-5">
+                With {doctor.name}
+            </p>
+
+            {message && (
+                <div className="bg-cyan-50 text-cyan-700 p-3 rounded-xl mb-4 text-sm">
+                    {message}
+                </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+
+                <input
+                    value={doctor.name}
+                    readOnly
+                    className="w-full p-3 rounded-xl bg-gray-100"
+                />
+
+                <input
+                    name="patientName"
+                    placeholder="Patient Name"
+                    className="w-full p-3 rounded-xl border"
+                    required
+                />
+
+                <select name="gender" className="w-full p-3 rounded-xl border" required>
+                    <option value="">Gender</option>
+                    <option>Male</option>
+                    <option>Female</option>
+                </select>
+
+                <input
+                    name="phone"
+                    placeholder="Phone"
+                    className="w-full p-3 rounded-xl border"
+                    required
+                />
+
+                <input
+                    type="date"
+                    name="appointmentDate"
+                    className="w-full p-3 rounded-xl border"
+                    required
+                />
+
+                <select name="appointmentTime" className="w-full p-3 rounded-xl border">
+                    {doctor.availability.map((t, i) => (
+                        <option key={i} value={t}>{t}</option>
+                    ))}
+                </select>
+
+                <button
+                    disabled={loading}
+                    className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 text-white py-3 rounded-xl font-semibold"
+                >
+                    {loading ? "Booking..." : "Confirm Appointment"}
+                </button>
+
+            </form>
+
+        </div>
     );
 }

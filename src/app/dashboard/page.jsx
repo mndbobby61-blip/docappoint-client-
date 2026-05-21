@@ -3,109 +3,161 @@
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import BookingCard from "@/app/dashboard/components/BookingCard";
 
 export default function DashboardPage() {
     const [bookings, setBookings] = useState([]);
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+
+    const [tab, setTab] = useState("profile");
+
     const router = useRouter();
 
     useEffect(() => {
-        const checkAuthAndFetchData = async () => {
+        const init = async () => {
             const session = await authClient.getSession();
+
             if (!session?.data?.user) {
                 router.push("/login");
                 return;
             }
+
             setUser(session.data.user);
 
-            // এক্সপ্রেস সার্ভার থেকে ডাটা গেট করা
-            try {
-                const response = await fetch("http://localhost:8080/api/bookings");
-                const allBookings = await response.json();
-                
-                // শুধুমাত্র এই ইউজারের বুকিং ফিল্টার
-                const userBookings = allBookings.filter(b => b.userEmail === session.data.user.email);
-                setBookings(userBookings);
-            } catch (error) {
-                console.error("Failed to fetch bookings from server:", error);
-            } finally {
-                setLoading(false);
-            }
+            const res = await fetch("http://localhost:8080/api/bookings");
+            const data = await res.json();
+
+            const userBookings = data.filter(
+                (b) => b.userEmail === session.data.user.email
+            );
+
+            setBookings(userBookings);
+            setLoading(false);
         };
-        
-        checkAuthAndFetchData();
-    }, [router]);
 
-    const handleDelete = async (dbId) => {
-        if (!confirm("Are you sure you want to cancel this appointment?")) return;
+        init();
+    }, []);
 
-        try {
-            // এক্সপ্রেস সার্ভারে ডিলিট রিকোয়েস্ট পাঠানো (_id পাস করা হচ্ছে)
-            const response = await fetch(`http://localhost:8080/api/bookings/${dbId}`, {
-                method: "DELETE"
-            });
-
-            if (response.ok) {
-                // UI স্টেট আপডেট করা
-                setBookings(bookings.filter((b) => b._id !== dbId));
-            } else {
-                alert("Failed to delete booking from server.");
-            }
-        } catch (error) {
-            console.error("Error deleting:", error);
-        }
+    const handleDeleteUI = (id) => {
+        setBookings((prev) => prev.filter((b) => b._id !== id));
     };
 
-    if (loading) return <div className="text-center p-10">Loading Dashboard Data...</div>;
-    if (!user) return null;
+    if (loading) {
+        return (
+            <div className="text-center p-10 text-gray-500">
+                Loading dashboard...
+            </div>
+        );
+    }
 
     return (
-        <div className="max-w-5xl mx-auto p-6">
-            <div className="flex justify-between items-center mb-6">
-                <div>
-                    <h1 className="text-3xl font-bold">My Bookings</h1>
-                    <p className="text-sm text-gray-500">Logged in as: {user.email}</p>
-                </div>
-                <button 
-                    onClick={async () => {
-                        await authClient.signOut();
-                        router.push("/login");
-                    }}
-                    className="text-sm text-red-500 hover:underline"
+        <div className="max-w-6xl mx-auto p-6 space-y-6">
+
+            {/* ===== TOP TABS (CARD STYLE) ===== */}
+            <div className="flex gap-3 bg-white p-2 rounded-2xl shadow-md border-gray-500 w-fit">
+
+                <button
+                    onClick={() => setTab("profile")}
+                    className={`px-6 py-2 rounded-xl text-sm font-medium transition shadow-sm
+                        ${tab === "profile"
+                            ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
+                            : "text-gray-600 hover:bg-gray-100"
+                        }`}
                 >
-                    Logout
+                    My Profile
                 </button>
+
+                <button
+                    onClick={() => setTab("bookings")}
+                    className={`px-6 py-2 rounded-xl text-sm font-medium transition shadow-sm
+                        ${tab === "bookings"
+                            ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
+                            : "text-gray-600 hover:bg-gray-100"
+                        }`}
+                >
+                    My Bookings
+                </button>
+
             </div>
 
-            {bookings.length === 0 ? (
-                <div className="border border-dashed p-10 text-center rounded-xl text-gray-500">
-                    No appointments booked yet in database.
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {bookings.map((b) => (
-                        <div key={b._id} className="border p-5 rounded-2xl bg-white shadow-sm flex flex-col justify-between">
-                            <div>
-                                <h2 className="text-xl font-bold text-gray-800">{b.doctorName}</h2>
-                                <div className="mt-2 space-y-1 text-sm text-gray-600">
-                                    <p><strong className="text-gray-700">Patient:</strong> {b.patientName} ({b.gender})</p>
-                                    <p><strong className="text-gray-700">Date:</strong> {b.appointmentDate}</p>
-                                    <p><strong className="text-gray-700">Time Slot:</strong> {b.appointmentTime}</p>
-                                    <p><strong className="text-gray-700">Phone:</strong> {b.phone}</p>
-                                </div>
-                            </div>
+            {/* ================= PROFILE CARD ================= */}
+            {tab === "profile" && (
+                <div className="bg-white rounded-2xl shadow-xl border-gray-500 p-8 hover:shadow-2xl transition">
 
-                            <button
-                                onClick={() => handleDelete(b._id)} // মঙ্গোডিবির _id পাস করা হচ্ছে
-                                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 text-sm font-medium rounded-xl mt-4 self-start transition"
-                            >
-                                Cancel Appointment
-                            </button>
+                    <div className="flex items-center gap-6">
+
+                        <img
+                            src={user?.image}
+                            className="w-24 h-24 rounded-full shadow-lg border-4 border-cyan-100"
+                        />
+
+                        <div>
+                            <h2 className="text-2xl font-bold text-gray-800">
+                                {user?.name}
+                            </h2>
+                            <p className="text-gray-500">
+                                {user?.email}
+                            </p>
                         </div>
-                    ))}
+
+                    </div>
+
+                    {/* INFO CARDS */}
+                    <div className="mt-8 grid md:grid-cols-2 gap-5">
+
+                        <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-5 rounded-xl shadow-md border-gray-500 hover:shadow-lg transition">
+                            <p className="text-sm text-gray-500">Account Status</p>
+                            <p className="text-lg font-bold text-green-600 mt-1">
+                                Active
+                            </p>
+                        </div>
+
+                        <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-5 rounded-xl shadow-md border-gray-500 hover:shadow-lg transition">
+                            <p className="text-sm text-gray-500">Total Bookings</p>
+                            <p className="text-lg font-bold text-cyan-600 mt-1">
+                                {bookings.length}
+                            </p>
+                        </div>
+
+                    </div>
+
                 </div>
             )}
+
+            {/* ================= BOOKINGS SECTION ================= */}
+            {tab === "bookings" && (
+                <div className="space-y-5">
+
+                    <h1 className="text-3xl font-bold text-gray-800">
+                        My Bookings
+                    </h1>
+
+                    {bookings.length === 0 ? (
+                        <div className="bg-white p-10 rounded-2xl shadow-md border-gray-500 text-center text-gray-500">
+                            No bookings found
+                        </div>
+                    ) : (
+                        <div className="grid md:grid-cols-2 gap-6">
+
+                            {bookings.map((b) => (
+                                <div
+                                    key={b._id}
+                                    className="shadow-lg hover:shadow-2xl transition rounded-2xl"
+                                >
+                                    <BookingCard
+                                        booking={b}
+                                        onDelete={handleDeleteUI}
+                                    />
+                                </div>
+                            ))}
+
+                        </div>
+                    )}
+
+                </div>
+            )}
+
         </div>
     );
 }
