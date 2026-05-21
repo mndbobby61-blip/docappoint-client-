@@ -1,6 +1,25 @@
-import Link from "next/link";
+"use client";
 
-export default function DoctorCard({ doctor, index }) {
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
+
+export default function DoctorCard({ doctor }) {
+
+    const router = useRouter();
+
+    const handleViewDetails = async () => {
+
+        const session = await authClient.getSession();
+
+        // ✅ check correctly
+        if (!session?.data?.user) {
+            router.push("/login");
+            return;
+        }
+
+        // ✅ logged in
+        router.push(`/doctors/${doctor.id}`);
+    };
 
     if (!doctor) return null;
 
@@ -54,11 +73,12 @@ export default function DoctorCard({ doctor, index }) {
                         ৳ {doctor.fee}
                     </span>
 
-                    <Link href={`/doctors/${index}`}>
-                        <button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-5 py-2 rounded-lg font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg">
-                            View Details
-                        </button>
-                    </Link>
+                    <button
+                        onClick={handleViewDetails}
+                        className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-5 py-2 rounded-lg font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                    >
+                        View Details
+                    </button>
 
                 </div>
 

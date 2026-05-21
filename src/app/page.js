@@ -6,10 +6,13 @@ import Testimonials from "@/components/Testimonials";
 
 
 async function getData() {
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   return [];
 }
 
+const topDoctors = [...doctors]
+  .sort((a, b) => b.rating - a.rating)
+  .slice(0, 3);
 
 export default async function Home() {
   await getData();
@@ -30,8 +33,8 @@ export default async function Home() {
 
       </section>
       <section className="py-16 bg-gray-50 flex flex-wrap justify-center gap-8">
-        {doctors.map((doctor, index) => (
-          <DoctorCard key={index} doctor={doctor} index={index} />
+        {topDoctors.map((doctor, index) => (
+          <DoctorCard key={doctor.id} doctor={doctor} index={index} />
         ))}
       </section>
       <WhyChoose />
