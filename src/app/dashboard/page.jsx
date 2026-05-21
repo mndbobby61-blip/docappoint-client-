@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import BookingCard from "@/app/dashboard/components/BookingCard";
+import toast from "react-hot-toast";
 
 export default function DashboardPage() {
     const [bookings, setBookings] = useState([]);
+    const [editBooking, setEditBooking] = useState(null);
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-
     const [tab, setTab] = useState("profile");
 
     const router = useRouter();
@@ -29,7 +30,7 @@ export default function DashboardPage() {
             const data = await res.json();
 
             const userBookings = data.filter(
-                (b) => b.userEmail === session.data.user.email
+                (b) => b && b.userEmail === session.data.user.email
             );
 
             setBookings(userBookings);
@@ -38,6 +39,61 @@ export default function DashboardPage() {
 
         init();
     }, []);
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+
+    if (!editBooking?._id) {
+        toast.error("No booking selected!");
+        return;
+    }
+
+    const form = e.target;
+
+    const updatedData = {
+        patientName: form.patientName.value,
+        gender: form.gender.value,
+        phone: form.phone.value,
+        appointmentDate: form.appointmentDate.value,
+        appointmentTime: form.appointmentTime.value,
+    };
+
+    try {
+        const res = await fetch(
+            `http://localhost:8080/api/bookings/${editBooking._id}`,
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(updatedData),
+            }
+        );
+
+        const data = await res.json(); // 👈 IMPORTANT
+
+        console.log("UPDATE RESPONSE:", data);
+
+        if (!res.ok) {
+            toast.error("Update failed!");
+            return;
+        }
+
+        setBookings((prev) =>
+            prev.map((b) =>
+                b._id === editBooking._id ? data : b
+            )
+        );
+
+        setEditBooking(null);
+
+        toast.success("Appointment updated successfully!");
+
+    } catch (error) {
+        console.log(error);
+        toast.error("Server error!");
+    }
+};
 
     const handleDeleteUI = (id) => {
         setBookings((prev) => prev.filter((b) => b._id !== id));
@@ -54,107 +110,133 @@ export default function DashboardPage() {
     return (
         <div className="max-w-6xl mx-auto p-6 space-y-6">
 
-            {/* ===== TOP TABS (CARD STYLE) ===== */}
-            <div className="flex gap-3 bg-white p-2 rounded-2xl shadow-md border-gray-500 w-fit">
+            {/* TABS */}
+            <div className="flex gap-3 bg-white p-2 rounded-2xl shadow-md w-fit">
 
                 <button
                     onClick={() => setTab("profile")}
-                    className={`px-6 py-2 rounded-xl text-sm font-medium transition shadow-sm
-                        ${tab === "profile"
-                            ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
-                            : "text-gray-600 hover:bg-gray-100"
-                        }`}
+                    className={`px-6 py-2 rounded-xl ${
+                        tab === "profile"
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-600"
+                    }`}
                 >
                     My Profile
                 </button>
 
                 <button
                     onClick={() => setTab("bookings")}
-                    className={`px-6 py-2 rounded-xl text-sm font-medium transition shadow-sm
-                        ${tab === "bookings"
-                            ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
-                            : "text-gray-600 hover:bg-gray-100"
-                        }`}
+                    className={`px-6 py-2 rounded-xl ${
+                        tab === "bookings"
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-600"
+                    }`}
                 >
                     My Bookings
                 </button>
 
             </div>
 
-            {/* ================= PROFILE CARD ================= */}
+            {/* PROFILE */}
             {tab === "profile" && (
-                <div className="bg-white rounded-2xl shadow-xl border-gray-500 p-8 hover:shadow-2xl transition">
+                <div className="bg-white p-8 rounded-2xl shadow">
+                    <img
+                        src={user?.image}
+                        className="w-20 h-20 rounded-full"
+                    />
+                    <h2 className="text-xl font-bold">{user?.name}</h2>
+                    <p>{user?.email}</p>
+                </div>
+            )}
 
-                    <div className="flex items-center gap-6">
+            {/* BOOKINGS */}
+            {tab === "bookings" && (
+                <div className="grid md:grid-cols-2 gap-5">
 
-                        <img
-                            src={user?.image}
-                            className="w-24 h-24 rounded-full shadow-lg border-4 border-cyan-100"
-                        />
-
-                        <div>
-                            <h2 className="text-2xl font-bold text-gray-800">
-                                {user?.name}
-                            </h2>
-                            <p className="text-gray-500">
-                                {user?.email}
-                            </p>
-                        </div>
-
-                    </div>
-
-                    {/* INFO CARDS */}
-                    <div className="mt-8 grid md:grid-cols-2 gap-5">
-
-                        <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-5 rounded-xl shadow-md border-gray-500 hover:shadow-lg transition">
-                            <p className="text-sm text-gray-500">Account Status</p>
-                            <p className="text-lg font-bold text-green-600 mt-1">
-                                Active
-                            </p>
-                        </div>
-
-                        <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-5 rounded-xl shadow-md border-gray-500 hover:shadow-lg transition">
-                            <p className="text-sm text-gray-500">Total Bookings</p>
-                            <p className="text-lg font-bold text-cyan-600 mt-1">
-                                {bookings.length}
-                            </p>
-                        </div>
-
-                    </div>
+                    {bookings
+                        ?.filter((b) => b && b._id)
+                        .map((b) => (
+                            <BookingCard
+                                key={b._id}
+                                booking={b}
+                                onDelete={handleDeleteUI}
+                                onUpdate={setEditBooking}
+                            />
+                        ))}
 
                 </div>
             )}
 
-            {/* ================= BOOKINGS SECTION ================= */}
-            {tab === "bookings" && (
-                <div className="space-y-5">
+            {/* UPDATE MODAL */}
+            {editBooking && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-2xl w-full max-w-md">
 
-                    <h1 className="text-3xl font-bold text-gray-800">
-                        My Bookings
-                    </h1>
+                        <h2 className="text-xl font-bold mb-4">
+                            Update Appointment
+                        </h2>
 
-                    {bookings.length === 0 ? (
-                        <div className="bg-white p-10 rounded-2xl shadow-md border-gray-500 text-center text-gray-500">
-                            No bookings found
-                        </div>
-                    ) : (
-                        <div className="grid md:grid-cols-2 gap-6">
+                        <form onSubmit={handleUpdate} className="space-y-3">
 
-                            {bookings.map((b) => (
-                                <div
-                                    key={b._id}
-                                    className="shadow-lg hover:shadow-2xl transition rounded-2xl"
+                            <input
+                                defaultValue={editBooking.doctorName}
+                                readOnly
+                                className="w-full border p-2 rounded"
+                            />
+
+                            <input
+                                name="patientName"
+                                defaultValue={editBooking.patientName}
+                                className="w-full border p-2 rounded"
+                            />
+
+                            <input
+                                name="gender"
+                                defaultValue={editBooking.gender}
+                                className="w-full border p-2 rounded"
+                            />
+
+                            <input
+                                name="phone"
+                                defaultValue={editBooking.phone}
+                                className="w-full border p-2 rounded"
+                            />
+
+                            <input
+                                type="date"
+                                name="appointmentDate"
+                                defaultValue={editBooking.appointmentDate}
+                                className="w-full border p-2 rounded"
+                            />
+
+                            <input
+                                name="appointmentTime"
+                                defaultValue={editBooking.appointmentTime}
+                                className="w-full border p-2 rounded"
+                            />
+
+                            <div className="flex gap-2">
+
+                                <button
+                                    type="submit"
+                                    className="bg-green-500 text-white px-4 py-2 rounded w-full"
                                 >
-                                    <BookingCard
-                                        booking={b}
-                                        onDelete={handleDeleteUI}
-                                    />
-                                </div>
-                            ))}
+                                    Save
+                                </button>
 
-                        </div>
-                    )}
+                                <button
+                                    type="button"
+                                    onClick={() => setEditBooking(null)}
+                                    className="bg-red-500 text-white px-4 py-2 rounded w-full"
+                                >
+                                    Cancel
+                                </button>
 
+                            </div>
+
+                        </form>
+
+                    </div>
                 </div>
             )}
 

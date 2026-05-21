@@ -3,35 +3,29 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-export default function BookingCard({ booking, onDelete, onEdit }) {
+export default function BookingCard({ booking, onDelete, onUpdate }) {
     const [loading, setLoading] = useState(false);
 
-
     const handleDelete = async () => {
-    setLoading(true);
+        setLoading(true);
 
-    const res = await fetch(
-        `http://localhost:8080/api/bookings/${booking._id}`,
-        {
-            method: "DELETE",
+        const res = await fetch(
+            `http://localhost:8080/api/bookings/${booking._id}`,
+            { method: "DELETE" }
+        );
+
+        if (res.ok) {
+            onDelete(booking._id);
+            toast.success("Appointment deleted successfully!");
+        } else {
+            toast.error("Delete failed!");
         }
-    );
 
-    if (res.ok) {
-        onDelete(booking._id);
-        toast.success("Appointment deleted successfully!");
-    } else {
-        toast.error("Delete failed!");
-    }
-
-    setLoading(false);
-};
+        setLoading(false);
+    };
 
     return (
-        <div className="relative group bg-white border-gray-500 rounded-2xl p-5 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden">
-
-            {/* glow background */}
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-50 to-blue-50 opacity-0 group-hover:opacity-100 transition" />
+        <div className="relative group bg-white rounded-2xl p-5 shadow-md hover:shadow-xl transition overflow-hidden">
 
             <div className="relative">
 
@@ -52,8 +46,8 @@ export default function BookingCard({ booking, onDelete, onEdit }) {
                 <div className="flex gap-3 mt-5">
 
                     <button
-                        onClick={() => onEdit(booking)}
-                        className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm hover:scale-105 transition"
+                        onClick={() => onUpdate(booking)}
+                        className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm"
                     >
                         Update
                     </button>
@@ -61,7 +55,7 @@ export default function BookingCard({ booking, onDelete, onEdit }) {
                     <button
                         onClick={handleDelete}
                         disabled={loading}
-                        className="px-4 py-2 rounded-xl bg-red-500 text-white text-sm hover:scale-105 transition disabled:opacity-50"
+                        className="px-4 py-2 rounded-xl bg-red-500 text-white text-sm disabled:opacity-50"
                     >
                         {loading ? "Deleting..." : "Delete"}
                     </button>
