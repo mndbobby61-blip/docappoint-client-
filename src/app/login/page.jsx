@@ -5,11 +5,15 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "react-hot-toast";
+import { useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
 
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+
+    const searchParams = useSearchParams();
+    const redirectpath = searchParams.get("redirect") || "/dashboard";
 
     const router = useRouter();
 
@@ -32,7 +36,7 @@ export default function LoginPage() {
 
             email,
             password,
-            callbackURL: "/dashboard",
+            callbackURL: redirectpath,
 
         }, {
 
@@ -40,7 +44,7 @@ export default function LoginPage() {
 
                 toast.success("Login successful!");
 
-                router.push("/dashboard");
+                router.push(redirect || "/dashboard");
                 router.refresh();
 
             },
@@ -68,7 +72,7 @@ export default function LoginPage() {
         await authClient.signIn.social({
 
             provider: "google",
-            callbackURL: "/dashboard",
+            callbackURL: redirect || "/dashboard",
 
         }, {
 

@@ -13,7 +13,7 @@ export default function DoctorCard({ doctor }) {
 
         if (!session?.data?.user) {
 
-            router.push("/login");
+            router.push(`/login?redirect=/doctors/${doctor.id}`);
             return;
         }
 

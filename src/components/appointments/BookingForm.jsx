@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import toast from "react-hot-toast";
 
 export default function BookingForm({ doctor, onSuccess }) {
 
@@ -40,8 +41,9 @@ export default function BookingForm({ doctor, onSuccess }) {
             });
 
             if (res.ok) {
-                setMessage("Appointment booked successfully!");
+                toast.success("Appointment booked successfully!");
                 e.target.reset();
+                
 
                 setTimeout(() => {
                     onSuccess?.();
