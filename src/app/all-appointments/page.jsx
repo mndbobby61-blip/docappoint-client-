@@ -1,51 +1,65 @@
-"use client";
+{/* PROFILE UPDATE MODAL */}
 
-import { useState } from "react";
-import doctors from "@/data/doctors.json";
-import DoctorCard from "@/components/DoctorCard";
+{profileModal && (
 
-export default function AllAppointments() {
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
 
-    const [search, setSearch] = useState("");
+        <div className="bg-white p-6 rounded-2xl w-full max-w-md">
 
-    const filteredDoctors = doctors.filter((doctor) =>
-        doctor.name
-            .toLowerCase()
-            .includes(search.toLowerCase())
-    );
+            <h2 className="text-2xl font-bold mb-5">
+                Update Profile
+            </h2>
 
-    return (
-        <div className="min-h-screen bg-gray-100 p-10">
-
-            {/* SEARCH */}
-
-            <div className="max-w-xl mx-auto mb-10">
+            <form
+                onSubmit={handleProfileUpdate}
+                className="space-y-4"
+            >
 
                 <input
-                    type="text"
-                    placeholder="Search doctor by name..."
-                    value={search}
-                    onChange={(e) =>
-                        setSearch(e.target.value)
-                    }
-                    className="w-full p-4 rounded-2xl border outline-none focus:ring-2 focus:ring-cyan-500"
+                    name="name"
+                    defaultValue={user?.name}
+                    placeholder="Name"
+                    className="w-full border p-3 rounded-xl"
+                    required
                 />
 
-            </div>
+                <input
+                    name="image"
+                    defaultValue={user?.image}
+                    placeholder="Photo URL"
+                    className="w-full border p-3 rounded-xl"
+                    required
+                />
 
-            {/* DOCTORS */}
+                <input
+                    value={user?.email}
+                    readOnly
+                    className="w-full border p-3 rounded-xl bg-gray-100"
+                />
 
-            <div className="flex flex-wrap gap-6 justify-center">
+                <div className="flex gap-3">
 
-                {filteredDoctors.map((doctor) => (
-                    <DoctorCard
-                        key={doctor.id}
-                        doctor={doctor}
-                    />
-                ))}
+                    <button
+                        type="submit"
+                        className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl"
+                    >
+                        Save Changes
+                    </button>
 
-            </div>
+                    <button
+                        type="button"
+                        onClick={() => setProfileModal(false)}
+                        className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl"
+                    >
+                        Cancel
+                    </button>
+
+                </div>
+
+            </form>
 
         </div>
-    );
-}
+
+    </div>
+
+)}
