@@ -44,7 +44,7 @@ export default function LoginPage() {
 
                 toast.success("Login successful!");
 
-                router.push(redirect || "/dashboard");
+                router.push(redirectpath);
                 router.refresh();
 
             },
@@ -72,7 +72,7 @@ export default function LoginPage() {
         await authClient.signIn.social({
 
             provider: "google",
-            callbackURL: redirect || "/dashboard",
+            callbackURL: redirectpath,
 
         }, {
 

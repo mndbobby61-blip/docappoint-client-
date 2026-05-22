@@ -1,6 +1,6 @@
 import doctors from "@/data/doctors.json";
 import BookingForm from "@/components/appointments/BookingForm";
-import { redirect } from "next/navigation";
+import { redirectpath } from "next/navigation";
 
 export default async function BookingPage({ params }) {
 
@@ -9,7 +9,7 @@ export default async function BookingPage({ params }) {
     const doctor = doctors.find((d) => d.id === id);
 
     if (!doctor) {
-        redirect("/");
+        redirectpath("/");
     }
 
     return (
