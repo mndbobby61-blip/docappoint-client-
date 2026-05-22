@@ -12,6 +12,7 @@ export default function DashboardPage() {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [tab, setTab] = useState("profile");
+    const [profileModal, setProfileModal] = useState(false);
 
     const router = useRouter();
 
@@ -40,60 +41,88 @@ export default function DashboardPage() {
         init();
     }, []);
 
-  const handleUpdate = async (e) => {
-    e.preventDefault();
+    const handleUpdate = async (e) => {
+        e.preventDefault();
 
-    if (!editBooking?._id) {
-        toast.error("No booking selected!");
-        return;
-    }
-
-    const form = e.target;
-
-    const updatedData = {
-        patientName: form.patientName.value,
-        gender: form.gender.value,
-        phone: form.phone.value,
-        appointmentDate: form.appointmentDate.value,
-        appointmentTime: form.appointmentTime.value,
-    };
-
-    try {
-        const res = await fetch(
-            `http://localhost:8080/api/bookings/${editBooking._id}`,
-            {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(updatedData),
-            }
-        );
-
-        const data = await res.json(); // 👈 IMPORTANT
-
-        console.log("UPDATE RESPONSE:", data);
-
-        if (!res.ok) {
-            toast.error("Update failed!");
+        if (!editBooking?._id) {
+            toast.error("No booking selected!");
             return;
         }
 
-        setBookings((prev) =>
-            prev.map((b) =>
-                b._id === editBooking._id ? data : b
-            )
-        );
+        const form = e.target;
 
-        setEditBooking(null);
+        const updatedData = {
+            patientName: form.patientName.value,
+            gender: form.gender.value,
+            phone: form.phone.value,
+            appointmentDate: form.appointmentDate.value,
+            appointmentTime: form.appointmentTime.value,
+        };
 
-        toast.success("Appointment updated successfully!");
+        try {
+            const res = await fetch(
+                `http://localhost:8080/api/bookings/${editBooking._id}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(updatedData),
+                }
+            );
 
-    } catch (error) {
-        console.log(error);
-        toast.error("Server error!");
-    }
-};
+            const data = await res.json(); IMPORTANT
+
+            console.log("UPDATE RESPONSE:", data);
+
+            if (!res.ok) {
+                toast.error("Update failed!");
+                return;
+            }
+
+            setBookings((prev) =>
+                prev.map((b) =>
+                    b._id === editBooking._id ? data : b
+                )
+            );
+
+            setEditBooking(null);
+
+            toast.success("Appointment updated successfully!");
+
+        } catch (error) {
+            console.log(error);
+            toast.error("Server error!");
+        }
+    };
+
+    const handleProfileUpdate = async (e) => {
+
+        e.preventDefault();
+
+        const form = e.target;
+
+        const updatedName = form.name.value;
+        const updatedImage = form.image.value;
+
+        try {
+
+            setUser((prev) => ({
+                ...prev,
+                name: updatedName,
+                image: updatedImage,
+            }));
+
+            setProfileModal(false);
+
+            toast.success("Profile updated successfully!");
+
+        } catch (error) {
+
+            toast.error("Profile update failed!");
+
+        }
+    };
 
     const handleDeleteUI = (id) => {
         setBookings((prev) => prev.filter((b) => b._id !== id));
@@ -115,22 +144,20 @@ export default function DashboardPage() {
 
                 <button
                     onClick={() => setTab("profile")}
-                    className={`px-6 py-2 rounded-xl ${
-                        tab === "profile"
-                            ? "bg-blue-500 text-white"
-                            : "text-gray-600"
-                    }`}
+                    className={`px-6 py-2 rounded-xl ${tab === "profile"
+                        ? "bg-blue-500 text-white"
+                        : "text-gray-600"
+                        }`}
                 >
                     My Profile
                 </button>
 
                 <button
                     onClick={() => setTab("bookings")}
-                    className={`px-6 py-2 rounded-xl ${
-                        tab === "bookings"
-                            ? "bg-blue-500 text-white"
-                            : "text-gray-600"
-                    }`}
+                    className={`px-6 py-2 rounded-xl ${tab === "bookings"
+                        ? "bg-blue-500 text-white"
+                        : "text-gray-600"
+                        }`}
                 >
                     My Bookings
                 </button>
@@ -139,14 +166,35 @@ export default function DashboardPage() {
 
             {/* PROFILE */}
             {tab === "profile" && (
-                <div className="bg-white p-8 rounded-2xl shadow">
-                    <img
-                        src={user?.image}
-                        className="w-20 h-20 rounded-full"
-                    />
-                    <h2 className="text-xl font-bold">{user?.name}</h2>
-                    <p>{user?.email}</p>
+
+                <div className="bg-white p-8 rounded-2xl shadow max-w-md">
+
+                    <div className="flex flex-col items-center text-center">
+
+                        <img
+                            src={user?.image}
+                            className="w-24 h-24 rounded-full object-cover border-4 border-cyan-500"
+                        />
+
+                        <h2 className="text-2xl font-bold mt-4">
+                            {user?.name}
+                        </h2>
+
+                        <p className="text-gray-500 mt-1">
+                            {user?.email}
+                        </p>
+
+                        <button
+                            onClick={() => setProfileModal(true)}
+                            className="mt-6 bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-3 rounded-xl transition"
+                        >
+                            Update Profile
+                        </button>
+
+                    </div>
+
                 </div>
+
             )}
 
             {/* BOOKINGS */}
