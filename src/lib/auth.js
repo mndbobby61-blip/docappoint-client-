@@ -30,8 +30,7 @@ export const auth = betterAuth({
     //  Allowed origins (MUST match .env.local frontend)
     trustedOrigins: [
         "http://localhost:3000",
-        "https://docappoint-client-6gz9.vercel.app",
-        process.env.BETTER_AUTH_URL
+        "https://docappoint-client-6gz9.vercel.app"
     ],
 
     //  Database
