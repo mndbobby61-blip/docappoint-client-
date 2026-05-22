@@ -9,10 +9,9 @@ export default function BookingCard({ booking, onDelete, onUpdate }) {
     const handleDelete = async () => {
         setLoading(true);
 
-        const res = await fetch(
-            `http://localhost:8080/api/bookings/${booking._id}`,
-            { method: "DELETE" }
-        );
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/bookings/${booking._id}`, {
+            method: "DELETE"
+        });
 
         if (res.ok) {
             onDelete(booking._id);

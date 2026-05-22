@@ -27,7 +27,7 @@ export default function DashboardPage() {
 
             setUser(session.data.user);
 
-            const res = await fetch("http://localhost:8080/api/bookings");
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/bookings`);
             const data = await res.json();
 
             const userBookings = data.filter(
@@ -61,7 +61,7 @@ export default function DashboardPage() {
 
         try {
             const res = await fetch(
-                `http://localhost:8080/api/bookings/${editBooking._id}`,
+                `${process.env.NEXT_PUBLIC_API_URL}/api/bookings/${editBooking._id}`,
                 {
                     method: "PUT",
                     headers: {
